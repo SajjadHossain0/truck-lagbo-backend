@@ -27,6 +27,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    //verify account logic here
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
@@ -47,6 +49,21 @@ public class AuthController {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
         }
     }
+
+    @PostMapping("/change-password/{userId}")
+    public ResponseEntity<?> changePassword(@PathVariable Long userId,
+                                            @RequestParam String oldPassword,
+                                            @RequestParam String newpassword) {
+        try{
+            userDataService.changePassword(userId, oldPassword, newpassword);
+            return ResponseEntity.ok("Password change successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+
+    }
+
+    // forget password logic here
 
 }
 

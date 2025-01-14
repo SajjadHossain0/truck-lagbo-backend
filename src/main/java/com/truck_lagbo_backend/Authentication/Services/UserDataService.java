@@ -44,6 +44,16 @@ public class UserDataService {
         return userRepo.findByEmail(email);
     }
 
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+    }
 
 
 }
