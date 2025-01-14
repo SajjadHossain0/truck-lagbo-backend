@@ -1,5 +1,6 @@
 package com.truck_lagbo_backend.Drivers.Entities;
 
+import com.truck_lagbo_backend.Authentication.Entities.User;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -8,6 +9,10 @@ public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     private String name;
     private String number;
@@ -26,8 +31,9 @@ public class Driver {
 
     public Driver() {}
 
-    public Driver(Long id, String name, String number, byte[] photo, List<String> vehicaltype, String weight, String size, String registrationnumber, List<String> servicearea, String price, boolean active) {
+    public Driver(Long id, User user, String name, String number, byte[] photo, List<String> vehicaltype, String weight, String size, String registrationnumber, List<String> servicearea, String price, boolean active) {
         this.id = id;
+        this.user = user;
         this.name = name;
         this.number = number;
         this.photo = photo;
@@ -46,6 +52,14 @@ public class Driver {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName() {

@@ -1,11 +1,61 @@
 package com.truck_lagbo_backend.Drivers.Controllers;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.truck_lagbo_backend.Authentication.Entities.User;
+import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
+import com.truck_lagbo_backend.Drivers.Entities.Driver;
+import com.truck_lagbo_backend.Drivers.Services.DriverService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/driver")
 @CrossOrigin
 public class DriversController {
+    @Autowired
+    private DriverService driverService;
+    @Autowired
+    private UserRepo userRepo;
+
+    @PostMapping("/register/{userId}")
+    public ResponseEntity<?> registerUserAsDriver(@PathVariable Long userId,
+                                                  @RequestParam("name") String name,
+                                                  @RequestParam("number") String number,
+                                                  @RequestParam("photo") MultipartFile photo,
+                                                  @RequestParam("vehicaltype") List<String> vehicaltype,
+                                                  @RequestParam("weight") String weight,
+                                                  @RequestParam("size") String size,
+                                                  @RequestParam("registrationnumber") String registrationnumber,
+                                                  @RequestParam("servicearea") List<String> servicearea,
+                                                  @RequestParam("price") String price) {
+        try {
+            // Convert MultipartFile photo to byte array
+            byte[] photoBytes = photo.isEmpty() ? null : photo.getBytes();
+
+            // Create a new Driver object
+            Driver driver = new Driver();
+            driver.setName(name);
+            driver.setNumber(number);
+            driver.setPhoto(photoBytes);
+            driver.setVehicaltype(vehicaltype);
+            driver.setWeight(weight);
+            driver.setSize(size);
+            driver.setRegistrationnumber(registrationnumber);
+            driver.setServicearea(servicearea);
+            driver.setPrice(price);
+            driver.setActive(false);
+
+            // Register the driver via service
+            Driver registeredDriver = driverService.registerDriver(userId, driver);
+            return ResponseEntity.ok(registeredDriver);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error processing the photo file: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }
