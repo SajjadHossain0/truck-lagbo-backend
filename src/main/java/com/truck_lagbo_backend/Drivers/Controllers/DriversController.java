@@ -58,4 +58,18 @@ public class DriversController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchDrivers(
+            @RequestParam(value = "truckType", required = false) String truckType,
+            @RequestParam(value = "capacity", required = false) String capacity,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "price", required = false) String price) {
+        try {
+            List<Driver> drivers = driverService.searchDrivers(truckType, capacity, location, price);
+            return ResponseEntity.ok(drivers);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

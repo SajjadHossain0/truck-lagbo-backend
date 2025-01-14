@@ -7,6 +7,8 @@ import com.truck_lagbo_backend.Drivers.Repositories.DriverRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DriverService {
     private final DriverRepo driverRepo;
@@ -28,6 +30,9 @@ public class DriverService {
         userRepo.save(user);
         driver.setUser(user);
         return driverRepo.save(driver);
+    }
 
+    public List<Driver> searchDrivers(String truckType, String capacity, String location, String price) {
+        return driverRepo.searchDrivers(truckType, capacity, location, price);
     }
 }
