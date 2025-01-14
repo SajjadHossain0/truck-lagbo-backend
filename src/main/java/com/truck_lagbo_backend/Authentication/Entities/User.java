@@ -1,13 +1,6 @@
 package com.truck_lagbo_backend.Authentication.Entities;
-
-
 import jakarta.persistence.*;
-import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class User {
     @Id
@@ -22,12 +15,15 @@ public class User {
     private String password;
     private String role;
 
-    public String getEmail() {
-        return email;
+    public User() {
     }
 
-    public void setEmail(String email) {
+    public User(Long id, String fullname, String email, String password, String role) {
+        this.id = id;
+        this.fullname = fullname;
         this.email = email;
+        this.password = password;
+        this.role = role;
     }
 
     public Long getId() {
@@ -44,6 +40,14 @@ public class User {
 
     public void setFullname(String fullname) {
         this.fullname = fullname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
