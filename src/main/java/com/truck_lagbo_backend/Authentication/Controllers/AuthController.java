@@ -63,7 +63,27 @@ public class AuthController {
 
     }
 
-    // forget password logic here
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try {
+            String resetToken = userDataService.generateResetToken(email);
+            userDataService.sendResetEmail(email, resetToken);
+            return ResponseEntity.ok(Map.of("message", "Reset token sent to your email"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        try {
+            userDataService.resetPassword(token, newPassword);
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 
 
 }

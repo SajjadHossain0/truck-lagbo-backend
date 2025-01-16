@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserDataService {
@@ -17,9 +20,10 @@ public class UserDataService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private EmailService emailService;
 
     public String register(User user) {
         user.setEmail(user.getEmail());
@@ -55,5 +59,41 @@ public class UserDataService {
         userRepo.save(user);
     }
 
+    public String generateResetToken(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Generate a unique token
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        user.setTokenExpiryDate(LocalDateTime.now().plusMinutes(15)); // Token valid for 15 minutes
+        userRepo.save(user);
+
+        return resetToken;
+    }
+
+    public void sendResetEmail(String email, String resetToken) {
+        String resetLink = "http://localhost:3000/reset-password?token=" + resetToken; // Frontend reset link
+        String message = "Click the link to reset your password: " + resetLink;
+
+        // Call email service to send the email
+        emailService.sendEmail(email, "Password Reset Request", message);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepo.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+
+        // Check if the token has expired
+        if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset token has expired");
+        }
+
+        // Update the user's password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setTokenExpiryDate(null);
+        userRepo.save(user);
+    }
 
 }
