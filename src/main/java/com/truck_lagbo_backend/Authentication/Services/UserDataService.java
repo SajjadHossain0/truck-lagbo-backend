@@ -74,9 +74,8 @@ public class UserDataService {
 
     public void sendResetEmail(String email, String resetToken) {
         String resetLink = "http://localhost:3000/reset-password?token=" + resetToken; // Frontend reset link
-        String message = "Click the link to reset your password: " + resetLink;
+        String message = "Click the link to reset your password : " + resetLink;
 
-        // Call email service to send the email
         emailService.sendEmail(email, "Password Reset Request", message);
     }
 
@@ -84,12 +83,10 @@ public class UserDataService {
         User user = userRepo.findByResetToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
 
-        // Check if the token has expired
         if (user.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Reset token has expired");
         }
 
-        // Update the user's password
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetToken(null);
         user.setTokenExpiryDate(null);
