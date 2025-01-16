@@ -29,7 +29,9 @@ public class Driver {
     private String price;
     private boolean active;
 
-    public Driver() {}
+    public Driver() {
+
+    }
 
     public Driver(Long id, User user, String name, String number, byte[] photo, List<String> vehicaltype, String weight, String size, String registrationnumber, List<String> servicearea, String price, boolean active) {
         this.id = id;
