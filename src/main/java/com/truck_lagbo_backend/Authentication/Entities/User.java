@@ -20,10 +20,13 @@ public class User {
     private String resetToken;
     private LocalDateTime tokenExpiryDate;
 
+    @Lob
+    private byte[] photo;
+
     public User() {
     }
 
-    public User(Long id, String fullname, String email, String password, String role, String resetToken, LocalDateTime tokenExpiryDate) {
+    public User(Long id, String fullname, String email, String password, String role, String resetToken, LocalDateTime tokenExpiryDate, byte[] photo) {
         this.id = id;
         this.fullname = fullname;
         this.email = email;
@@ -31,8 +34,8 @@ public class User {
         this.role = role;
         this.resetToken = resetToken;
         this.tokenExpiryDate = tokenExpiryDate;
+        this.photo = photo;
     }
-
 
     public Long getId() {
         return id;
@@ -88,5 +91,13 @@ public class User {
 
     public void setTokenExpiryDate(LocalDateTime tokenExpiryDate) {
         this.tokenExpiryDate = tokenExpiryDate;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 }

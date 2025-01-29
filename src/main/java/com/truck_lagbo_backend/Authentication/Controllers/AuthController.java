@@ -21,6 +21,8 @@ public class AuthController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
+
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         String response = userDataService.register(user);
