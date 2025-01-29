@@ -3,6 +3,7 @@ package com.truck_lagbo_backend.Drivers.Controllers;
 import com.truck_lagbo_backend.Authentication.Entities.User;
 import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
 import com.truck_lagbo_backend.Drivers.Entities.Driver;
+import com.truck_lagbo_backend.Drivers.Repositories.DriverRepo;
 import com.truck_lagbo_backend.Drivers.Services.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/driver")
@@ -20,6 +22,21 @@ public class DriversController {
     private DriverService driverService;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private DriverRepo driverRepo;
+
+    @GetMapping
+    public ResponseEntity<List<Driver>> getAllDrivers() {
+        List<Driver> drivers = driverRepo.findAll();
+        return ResponseEntity.ok(drivers);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Driver> getDriverById(@PathVariable Long id) {
+        return driverRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @PostMapping("/register/{userId}")
     public ResponseEntity<?> registerUserAsDriver(@PathVariable Long userId,
