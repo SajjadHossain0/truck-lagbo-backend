@@ -17,6 +17,9 @@ public class User {
     private String password;
     private String role;
 
+    private String ipAddress;
+    private String location;
+
     private String resetToken;
     private LocalDateTime tokenExpiryDate;
 
@@ -26,12 +29,14 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String fullname, String email, String password, String role, String resetToken, LocalDateTime tokenExpiryDate, byte[] photo) {
+    public User(Long id, String fullname, String email, String password, String role, String ipAddress, String location, String resetToken, LocalDateTime tokenExpiryDate, byte[] photo) {
         this.id = id;
         this.fullname = fullname;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.ipAddress = ipAddress;
+        this.location = location;
         this.resetToken = resetToken;
         this.tokenExpiryDate = tokenExpiryDate;
         this.photo = photo;
@@ -99,5 +104,21 @@ public class User {
 
     public void setPhoto(byte[] photo) {
         this.photo = photo;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

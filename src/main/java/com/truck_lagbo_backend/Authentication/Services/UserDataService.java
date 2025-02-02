@@ -1,12 +1,17 @@
 package com.truck_lagbo_backend.Authentication.Services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.truck_lagbo_backend.Authentication.Entities.User;
 import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
 import com.truck_lagbo_backend.Components.JwtTokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -92,5 +97,39 @@ public class UserDataService {
         user.setTokenExpiryDate(null);
         userRepo.save(user);
     }
+
+    public String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip.equals("0:0:0:0:0:0:0:1") ? "127.0.0.1" : ip; // Convert localhost IPv6 to IPv4
+    }
+
+    public String getLocationFromIp(String ip) {
+        try {
+            if (ip.equals("127.0.0.1")) {
+                return "Localhost";
+            }
+
+            String url = "http://ip-api.com/json/" + ip;
+            RestTemplate restTemplate = new RestTemplate();
+            String response = restTemplate.getForObject(url, String.class);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response);
+
+            String country = jsonNode.has("country") ? jsonNode.get("country").asText() : "Unknown";
+            String city = jsonNode.has("city") ? jsonNode.get("city").asText() : "Unknown";
+
+            return country + ", " + city;
+        } catch (Exception e) {
+            return "Unknown";
+        }
+    }
+
 
 }

@@ -4,6 +4,7 @@ import com.truck_lagbo_backend.Authentication.Entities.LoginRequest;
 import com.truck_lagbo_backend.Authentication.Entities.User;
 import com.truck_lagbo_backend.Authentication.Services.UserDataService;
 import com.truck_lagbo_backend.Components.JwtTokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -24,7 +25,13 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<String> registerUser(@RequestBody User user, HttpServletRequest request) {
+        String ip = userDataService.getClientIp(request);
+        String location = userDataService.getLocationFromIp(ip);
+
+        user.setIpAddress(ip);
+        user.setLocation(location);
+
         String response = userDataService.register(user);
         return ResponseEntity.ok(response);
     }
@@ -32,17 +39,24 @@ public class AuthController {
     //verify account logic here
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
             String token = userDataService.login(loginRequest.getEmail(), loginRequest.getPassword());
             User user = userDataService.getUserByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            String ip = userDataService.getClientIp(request);
+            String location = userDataService.getLocationFromIp(ip);
+
+            user.setIpAddress(ip);
+            user.setLocation(location);
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             response.put("userId", String.valueOf(user.getId()));
             response.put("role", user.getRole());
+            response.put("ip", ip);
+            response.put("location", location);
 
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
