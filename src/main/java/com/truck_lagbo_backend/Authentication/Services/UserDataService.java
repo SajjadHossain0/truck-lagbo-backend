@@ -2,6 +2,7 @@ package com.truck_lagbo_backend.Authentication.Services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.truck_lagbo_backend.Authentication.Entities.IpQualityScoreResponse;
 import com.truck_lagbo_backend.Authentication.Entities.User;
 import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
 import com.truck_lagbo_backend.Components.JwtTokenUtil;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -99,25 +101,53 @@ public class UserDataService {
     }
 
     public String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress != null && !ipAddress.isEmpty() && !"unknown".equalsIgnoreCase(ipAddress)) {
+            return ipAddress.split(",")[0].trim(); // Take the first valid IP
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
+
+        ipAddress = request.getHeader("Proxy-Client-IP");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
         }
-        return ip.equals("0:0:0:0:0:0:0:1") ? "127.0.0.1" : ip; // Convert localhost IPv6 to IPv4
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
     }
 
-    public String getLocationFromIp(String ip) {
-        try {
-            if (ip.equals("127.0.0.1")) {
-                return "Localhost";
-            }
+    public boolean isSuspiciousIp(String ipAddress) {
+        String apiUrl = "https://www.ipqualityscore.com/api/json/ip/YOUR_API_KEY/" + ipAddress;
+        RestTemplate restTemplate = new RestTemplate();
 
-            String url = "http://ip-api.com/json/" + ip;
-            RestTemplate restTemplate = new RestTemplate();
+        try {
+            IpQualityScoreResponse response = restTemplate.getForObject(apiUrl, IpQualityScoreResponse.class);
+            return response != null && (response.isVpn() || response.isProxy() || response.isDataCenter());
+        } catch (Exception e) {
+            System.err.println("Failed to check IP: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean isMultiAccount(String ipAddress) {
+        List<User> users = userRepo.findByIpAddress(ipAddress);
+        return users.size() > 1;  // More than 1 user with the same IP = Suspicious!
+    }
+
+
+    public String getLocationFromIp(String ip) {
+        if ("127.0.0.1".equals(ip)) {
+            return "Localhost";
+        }
+
+        String url = "http://ip-api.com/json/" + ip;
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
             String response = restTemplate.getForObject(url, String.class);
+            if (response == null) {
+                return "Unknown";
+            }
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response);
@@ -127,6 +157,7 @@ public class UserDataService {
 
             return country + ", " + city;
         } catch (Exception e) {
+            System.err.println("Error fetching location: " + e.getMessage());
             return "Unknown";
         }
     }
