@@ -113,6 +113,11 @@ public class UserDataService {
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
         }
+
+        if("0:0:0:0:0:0:0:1".equals(ipAddress)) {
+            ipAddress = "127.0.0.1"; //for localhost ip Address.
+        }
+
         return ipAddress;
     }
 
