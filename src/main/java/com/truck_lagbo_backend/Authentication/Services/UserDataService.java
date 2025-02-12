@@ -7,7 +7,6 @@ import com.truck_lagbo_backend.Authentication.Entities.User;
 import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
 import com.truck_lagbo_backend.Components.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -138,7 +137,6 @@ public class UserDataService {
         List<User> users = userRepo.findByIpAddress(ipAddress);
         return users.size() > 1;  // More than 1 user with the same IP = Suspicious!
     }
-
 
     public String getLocationFromIp(String ip) {
         if ("127.0.0.1".equals(ip)) {

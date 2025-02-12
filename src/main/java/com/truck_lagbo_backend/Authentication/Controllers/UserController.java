@@ -5,8 +5,6 @@ import com.truck_lagbo_backend.Authentication.Repositories.UserRepo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin
